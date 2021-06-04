@@ -198,7 +198,9 @@ for epoch in range(num_epochs):
         train_cost += cse1.forward(prob, one_hot_y)
 
         # backpropagation
+        # cross entry에서 나온 gradient
         dCSE1 = cse1.backprop(prob, one_hot_y)
+        # fully connected layer에서 나온 gradient 는 원래 input들 + 뒤에서 온 gradient dCSE1
         dW_FC1, dZ_FC1, dB_FC1 = fc1.backprop(
             relu1_ofmap.reshape(1, 28*28*5), dCSE1)
         dRELU1 = relu1.backprop(conv1_ofmap)
@@ -210,9 +212,13 @@ for epoch in range(num_epochs):
         fc1.kernel -= lr * dW_FC1
         fc1.bias -= lr * dB_FC1
 
+        # forward했을 때 얼마만큼 답이 맞았는지 계산
+        # probability가 가장 높은 게 답 : argmax를 써서 probability가 가장 높은 vector element의 index를 가져온다
+        # 그 값이 mini_y_train과 같으면 정답
         train_correct += np.sum(np.equal(np.argmax(prob,
                                 axis=1), mini_y_train))
 
+        # 100개의 image를 training할 때 마다 출력
         if (total_trained % 100 == 0):
             print("Trained: ", total_trained, "/", train_iterations,
                   "\ttrain accuracy: ", train_correct/100, "\ttrain cost: ", train_cost/100)
